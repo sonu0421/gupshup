@@ -1,8 +1,9 @@
 import axios from "axios";
 
-// Same-origin: /api is proxied to the backend by Vite in dev
+// API base: Vercel deploy par VITE_API_URL set hota hai (Render backend ka URL).
+// Local/dev me same-origin "/api" (Vite proxy / backend static serve).
 const api = axios.create({
-  baseURL: "/api",
+  baseURL: import.meta.env.VITE_API_URL || "/api",
   timeout: 15000, // never hang forever on a bad network — fail fast instead
 });
 

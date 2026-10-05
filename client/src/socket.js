@@ -13,8 +13,10 @@ export function getSocket() {
     socket = null;
   }
   if (!socket) {
-    // Same-origin connection (proxied to the backend by Vite in dev)
-    socket = io({ auth: { token } });
+    // Vercel deploy par VITE_SOCKET_URL = Render backend ka URL.
+    // Local/dev me same-origin (proxied to the backend by Vite in dev).
+    const socketUrl = import.meta.env.VITE_SOCKET_URL || undefined;
+    socket = io(socketUrl, { auth: { token } });
     socketToken = token;
   }
   return socket;
