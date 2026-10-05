@@ -61,8 +61,18 @@ app.use("/api/notes", notesRoutes);
 app.use("/api/notifications", notificationsRoutes);
 app.use("/api/feed", feedRoutes);
 
-// Uploaded photos (avatars, posts, chat images) — same dir multer writes to
-app.use("/uploads", express.static(path.join(__dirname, "../uploads")));
+// Uploaded photos (avatars, posts, chat images) — same dir multer writes to.
+// NOTE: Helmet sets Cross-Origin-Resource-Policy: same-origin globally, which
+// would BLOCK these images from loading on the Vercel frontend (cross-origin
+// <img>). Override it here so photos display — they carry no cookies/auth.
+app.use(
+  "/uploads",
+  (req, res, next) => {
+    res.setHeader("Cross-Origin-Resource-Policy", "cross-origin");
+    next();
+  },
+  express.static(path.join(__dirname, "../uploads"))
+);
 
 // Serve the production frontend from client/dist (run `npm run build` in client/).
 // In dev, use the Vite server on :5173 instead; this only kicks in when dist exists.
