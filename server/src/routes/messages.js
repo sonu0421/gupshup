@@ -45,7 +45,7 @@ router.get("/:conversationId", authRequired, async (req, res) => {
   if (!convo || !convo.participants.map(String).includes(req.userId))
     return res.status(403).json({ message: "Not allowed" });
   const messages = await Message.find({ conversation: req.params.conversationId })
-    .populate("sender", "name email")
+    .populate("sender", "name email avatar avatarColor")
     .sort({ createdAt: 1 })
     .limit(300);
   res.json(messages);

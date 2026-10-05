@@ -91,7 +91,7 @@ export function initSocket(io) {
           image: image || null,
         });
         await Conversation.findByIdAndUpdate(conversationId, { lastMessage: message._id });
-        const populated = await message.populate("sender", "name email");
+        const populated = await message.populate("sender", "name email avatar avatarColor");
         // clientTempId is NOT saved — just echoed so the sender can replace
         // its optimistic ("sending...") bubble with the real message
         const out = populated.toObject();

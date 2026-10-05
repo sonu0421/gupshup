@@ -7,7 +7,7 @@ const router = Router();
 // GET /api/conversations — my chat list, newest first
 router.get("/", authRequired, async (req, res) => {
   const convos = await Conversation.find({ participants: req.userId })
-    .populate("participants", "name email")
+    .populate("participants", "name email avatar avatarColor")
     .populate({ path: "lastMessage", populate: { path: "sender", select: "name" } })
     .sort({ updatedAt: -1 });
   res.json(convos);
@@ -20,10 +20,10 @@ router.post("/", authRequired, async (req, res) => {
   let convo = await Conversation.findOne({
     isGroup: false,
     participants: { $all: [req.userId, userId], $size: 2 },
-  }).populate("participants", "name email");
+  }).populate("participants", "name email avatar avatarColor");
   if (!convo) {
     convo = await Conversation.create({ participants: [req.userId, userId] });
-    convo = await convo.populate("participants", "name email");
+    convo = await convo.populate("participants", "name email avatar avatarColor");
   }
   res.status(201).json(convo);
 });
@@ -39,7 +39,7 @@ router.post("/group", authRequired, async (req, res) => {
     participants: [...new Set([req.userId, ...userIds])],
     admin: req.userId,
   });
-  res.status(201).json(await convo.populate("participants", "name email"));
+  res.status(201).json(await convo.populate("participants", "name email avatar avatarColor"));
 });
 
 export default router;
