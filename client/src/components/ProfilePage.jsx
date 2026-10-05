@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import api from "../api.js";
-import { useAuth } from "../context/AuthContext.jsx";
+import { useAuth } from "../context/AuthContext.jsx"; // blank-screen fix
 import Avatar from "./Avatar.jsx";
 import { IconHeart, IconChevronLeft } from "./icons.jsx";
 import { timeHM, fileUrl } from "../utils.js";
