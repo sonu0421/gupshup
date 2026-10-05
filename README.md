@@ -3,6 +3,12 @@
 A full-stack MERN chat application with real-time messaging powered by **Socket.io**.
 Built as a BTech final-year / semester project.
 
+## Screenshots
+
+| Login | Home Feed | Chat |
+|---|---|---|
+| ![Login](screenshots/1-login.png) | ![Home](screenshots/2-home.png) | ![Chat](screenshots/3-chat.png) |
+
 ## Features
 
 - **Auth** — register / login with JWT + bcrypt password hashing
