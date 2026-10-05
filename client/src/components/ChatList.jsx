@@ -121,49 +121,79 @@ export default function ChatList({
       {showGroup && (
         <div style={{ padding: "0 16px 10px" }}>
           <div className="feed-card" style={{ padding: 14 }}>
+            <div style={{ fontWeight: 800, fontSize: 16, marginBottom: 10 }}>👥 New Group</div>
             <input
-              placeholder="Group name"
+              placeholder="Group name likho…"
               value={groupName}
               onChange={(e) => setGroupName(e.target.value)}
               style={{ marginBottom: 8 }}
             />
             <div className="muted small" style={{ marginBottom: 8 }}>
-              Search people above, then tick members:
+              🔍 Upar search karo, phir members tick karo:
             </div>
+            {selected.length > 0 && (
+              <div style={{ marginBottom: 8, fontWeight: 700, color: "var(--brand)" }}>
+                ✓ {selected.length} member{selected.length > 1 ? "s" : ""} selected
+              </div>
+            )}
+            {results.length === 0 && query.trim() && (
+              <div className="muted small" style={{ padding: "8px 0" }}>Koi nahi mila — naam se search karo</div>
+            )}
             {results.map((u) => (
-              <label key={u._id} className="member-row" style={{ display: "flex", gap: 8, alignItems: "center", padding: "6px 0" }}>
+              <label key={u._id} className="member-row" style={{ display: "flex", gap: 8, alignItems: "center", padding: "8px 0", cursor: "pointer" }}>
                 <input
                   type="checkbox"
                   checked={selected.includes(u._id)}
                   onChange={() => toggleSelect(u._id)}
-                  style={{ width: "auto" }}
+                  style={{ width: 20, height: 20 }}
                 />
+                <Avatar user={u} size={36} />
                 <span style={{ fontWeight: 600 }}>{u.name}</span>
-                <span className="muted small">{u.email}</span>
               </label>
             ))}
-            <button className="btn primary block" onClick={createGroup} style={{ marginTop: 8 }}>
-              Create group
+            <button
+              className="btn primary block"
+              onClick={createGroup}
+              disabled={!groupName.trim() || selected.length === 0}
+              style={{ marginTop: 12, opacity: (!groupName.trim() || selected.length === 0) ? 0.5 : 1 }}
+            >
+              {selected.length > 0 ? `Create Group (${selected.length})` : "Create Group"}
             </button>
+            {(!groupName.trim() || selected.length === 0) && (
+              <div className="muted small" style={{ marginTop: 6, textAlign: "center" }}>
+                {!groupName.trim() ? "Pehle group ka naam likho" : "Kam se kam 1 member tick karo"}
+              </div>
+            )}
           </div>
         </div>
       )}
 
-      {!showGroup && results.length > 0 && (
+      {/* Search results — SABSE UPAR, prominent */}
+      {!showGroup && query.trim() && (
         <div style={{ padding: "0 16px 10px" }}>
-          {results.map((u) => (
-            <button key={u._id} className="convo-row" onClick={() => startChat(u._id)}>
-              <Avatar user={u} size={44} />
-              <div className="convo-meta">
-                <div className="convo-name">{u.name}</div>
-                <div className="muted small ellipsis">{u.email}</div>
-              </div>
-            </button>
-          ))}
+          <div style={{ fontWeight: 800, fontSize: 14, marginBottom: 8, color: "var(--brand)" }}>
+            👥 People ({results.length})
+          </div>
+          {results.length === 0 ? (
+            <div className="muted small" style={{ padding: "8px 0" }}>
+              "{query}" se koi nahi mila
+            </div>
+          ) : (
+            results.map((u) => (
+              <button key={u._id} className="convo-row" onClick={() => startChat(u._id)} style={{ border: "1px solid var(--brand-soft)", borderRadius: 12, marginBottom: 6 }}>
+                <Avatar user={u} size={44} />
+                <div className="convo-meta">
+                  <div className="convo-name">{u.name}</div>
+                  <div className="muted small ellipsis">Tap karke chat shuru karo 💬</div>
+                </div>
+              </button>
+            ))
+          )}
         </div>
       )}
 
-      {onlineFriends.length > 0 && (
+      {/* Jab search ho raha hai to normal list chhupao */}
+      {!query.trim() && onlineFriends.length > 0 && (
         <div style={{ padding: "2px 16px 10px", display: "flex", gap: 12, overflowX: "auto" }}>
           {onlineFriends.map((p) => (
             <button
@@ -183,6 +213,8 @@ export default function ChatList({
         </div>
       )}
 
+      {/* Jab search ho raha hai to normal chat list chhupao — sirf results dikhao */}
+      {!query.trim() && (
       <div className="convo-list">
         {visible.map((c) => {
           const other = convoOther(c, user._id);
@@ -230,6 +262,7 @@ export default function ChatList({
           </div>
         )}
       </div>
+      )}
     </div>
   );
 }
