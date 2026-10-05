@@ -72,9 +72,15 @@ export default function ChatList({
     setResults([]);
   };
 
+  const q = query.trim().toLowerCase();
   const visible = conversations.filter((c) => {
-    if (filter === "unread") return (unread[c._id] || 0) > 0;
-    if (filter === "groups") return c.isGroup;
+    if (filter === "unread" && !q) return (unread[c._id] || 0) > 0;
+    if (filter === "groups" && !q) return c.isGroup;
+    // Search ho raha hai to naam se filter karo
+    if (q) {
+      const name = convoName(c, user._id).toLowerCase();
+      return name.includes(q);
+    }
     return true;
   });
 
@@ -169,14 +175,14 @@ export default function ChatList({
       )}
 
       {/* Search results — SABSE UPAR, prominent */}
-      {!showGroup && query.trim() && (
+      {!showGroup && q && (
         <div style={{ padding: "0 16px 10px" }}>
           <div style={{ fontWeight: 800, fontSize: 14, marginBottom: 8, color: "var(--brand)" }}>
             👥 People ({results.length})
           </div>
           {results.length === 0 ? (
             <div className="muted small" style={{ padding: "8px 0" }}>
-              "{query}" se koi nahi mila
+              "{query}" se koi naya banda nahi mila
             </div>
           ) : (
             results.map((u) => (
@@ -189,11 +195,17 @@ export default function ChatList({
               </button>
             ))
           )}
+          {/* Matching chats bhi dikhao */}
+          {visible.length > 0 && (
+            <div style={{ fontWeight: 800, fontSize: 14, margin: "12px 0 8px", color: "var(--brand)" }}>
+              💬 Chats ({visible.length})
+            </div>
+          )}
         </div>
       )}
 
-      {/* Jab search ho raha hai to normal list chhupao */}
-      {!query.trim() && onlineFriends.length > 0 && (
+      {/* Jab search nahi ho raha to online friends dikhao */}
+      {!q && onlineFriends.length > 0 && (
         <div style={{ padding: "2px 16px 10px", display: "flex", gap: 12, overflowX: "auto" }}>
           {onlineFriends.map((p) => (
             <button
@@ -213,8 +225,8 @@ export default function ChatList({
         </div>
       )}
 
-      {/* Jab search ho raha hai to normal chat list chhupao — sirf results dikhao */}
-      {!query.trim() && (
+      {/* Chat list — search me filter hokar dikhegi */}
+      {!showGroup && (
       <div className="convo-list">
         {visible.map((c) => {
           const other = convoOther(c, user._id);
