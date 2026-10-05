@@ -264,6 +264,17 @@ export default function Chat() {
   // --- Render pieces ---
   const refreshConvos = () =>
     api.get("/conversations").then((res) => setConversations(res.data)).catch(() => {});
+  // Chat delete (sirf apne liye) — list se turant hatao
+  const deleteChat = async (convoId) => {
+    try {
+      await api.delete(`/conversations/${convoId}`);
+    } catch {
+      /* ignore — phir bhi list se hatao */
+    }
+    setConversations((prev) => prev.filter((c) => c._id !== convoId));
+    setActiveId(null);
+  };
+
   const chatList = (
     <PullToRefresh onRefresh={refreshConvos} className="fill">
       <ChatList
@@ -284,17 +295,6 @@ export default function Chat() {
     />
     </PullToRefresh>
   );
-
-  // Chat delete (sirf apne liye) — list se turant hatao
-  const deleteChat = async (convoId) => {
-    try {
-      await api.delete(`/conversations/${convoId}`);
-    } catch {
-      /* ignore — phir bhi list se hatao */
-    }
-    setConversations((prev) => prev.filter((c) => c._id !== convoId));
-    setActiveId(null);
-  };
 
   const thread = (
     <ChatWindow
