@@ -6,7 +6,7 @@ import { convoName, convoOther, timeHM, isSeenByAll, fileUrl } from "../utils.js
 import { IconSend, IconImage, IconX, IconChat, IconChevronLeft, IconPhone, IconVideo } from "./icons.jsx";
 import Avatar from "./Avatar.jsx";
 
-export default function ChatWindow({ convo, onlineUsers, onBack, onViewProfile }) {
+export default function ChatWindow({ convo, onlineUsers, onBack, onViewProfile, onDeleteChat }) {
   const { user } = useAuth();
   const [messages, setMessages] = useState([]);
   const [text, setText] = useState("");
@@ -15,6 +15,8 @@ export default function ChatWindow({ convo, onlineUsers, onBack, onViewProfile }
   const [hasNew, setHasNew] = useState(false);
   const [uploading, setUploading] = useState(false);
   const [lightbox, setLightbox] = useState(null);
+  const [showMenu, setShowMenu] = useState(false);
+  const [confirmDelete, setConfirmDelete] = useState(false);
   const fileRef = useRef(null);
   const bottomRef = useRef(null);
   const scrollRef = useRef(null);
@@ -259,6 +261,34 @@ export default function ChatWindow({ convo, onlineUsers, onBack, onViewProfile }
           <button className="icon-btn" title="Video call (coming soon)" aria-label="Video call">
             <IconVideo width={20} height={20} />
           </button>
+          <div style={{ position: "relative" }}>
+            <button
+              className="icon-btn"
+              title="Chat options"
+              aria-label="Chat options"
+              onClick={() => { setShowMenu((s) => !s); setConfirmDelete(false); }}
+            >
+              ⋮
+            </button>
+            {showMenu && (
+              <div className="chat-menu">
+                <button
+                  className="chat-menu-item danger"
+                  onClick={() => {
+                    if (confirmDelete) {
+                      onDeleteChat?.(convo._id);
+                      setShowMenu(false);
+                    } else {
+                      setConfirmDelete(true);
+                      setTimeout(() => setConfirmDelete(false), 3000);
+                    }
+                  }}
+                >
+                  {confirmDelete ? "Pakka delete? ✓" : "🗑️ Delete chat"}
+                </button>
+              </div>
+            )}
+          </div>
         </div>
       </header>
 

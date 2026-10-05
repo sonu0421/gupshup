@@ -4,9 +4,12 @@ import { authRequired } from "../middleware/auth.js";
 
 const router = Router();
 
-// GET /api/conversations — my chat list, newest first
+// GET /api/conversations — my chat list, newest first (deleted/hidden chats excluded)
 router.get("/", authRequired, async (req, res) => {
-  const convos = await Conversation.find({ participants: req.userId })
+  const convos = await Conversation.find({
+    participants: req.userId,
+    hiddenFor: { $ne: req.userId },
+  })
     .populate("participants", "name email avatar avatarColor")
     .populate({ path: "lastMessage", populate: { path: "sender", select: "name" } })
     .sort({ updatedAt: -1 });
@@ -40,6 +43,21 @@ router.post("/group", authRequired, async (req, res) => {
     admin: req.userId,
   });
   res.status(201).json(await convo.populate("participants", "name email avatar avatarColor"));
+});
+
+// DELETE /api/conversations/:id — "Delete chat" (sirf apne liye).
+// Dusre participant ki list me chat bani rahegi. Naya message aate hi
+// ye chat aapki list me wapas aa jayegi (WhatsApp jaisa).
+router.delete("/:id", authRequired, async (req, res) => {
+  const convo = await Conversation.findOne({
+    _id: req.params.id,
+    participants: req.userId,
+  });
+  if (!convo) return res.status(404).json({ message: "Chat nahi mili" });
+  await Conversation.findByIdAndUpdate(req.params.id, {
+    $addToSet: { hiddenFor: req.userId },
+  });
+  res.json({ ok: true });
 });
 
 export default router;

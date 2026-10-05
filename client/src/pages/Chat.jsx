@@ -284,12 +284,24 @@ export default function Chat() {
     </PullToRefresh>
   );
 
+  // Chat delete (sirf apne liye) — list se turant hatao
+  const deleteChat = async (convoId) => {
+    try {
+      await api.delete(`/conversations/${convoId}`);
+    } catch {
+      /* ignore — phir bhi list se hatao */
+    }
+    setConversations((prev) => prev.filter((c) => c._id !== convoId));
+    setActiveId(null);
+  };
+
   const thread = (
     <ChatWindow
       convo={activeConvo}
       onlineUsers={onlineUsers}
       onBack={() => setActiveId(null)}
       onViewProfile={openProfile}
+      onDeleteChat={deleteChat}
     />
   );
 
@@ -395,6 +407,7 @@ export default function Chat() {
               onMessage={openDirectChat}
               onGoRequests={() => handleTabChange("requests")}
               onLogout={logout}
+              onUnfriend={() => refreshSocial()}
             />
           </div>
         )}
@@ -428,6 +441,7 @@ export default function Chat() {
                 setProfileId(null);
                 handleTabChange("requests");
               }}
+              onUnfriend={() => refreshSocial()}
             />
           </div>
         </div>

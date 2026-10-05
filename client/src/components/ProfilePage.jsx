@@ -41,6 +41,7 @@ export default function ProfilePage({
   onMessage,
   onGoRequests,
   onLogout,
+  onUnfriend,
 }) {
   const [profile, setProfile] = useState(null);
   const [friendStatus, setFriendStatus] = useState("none");
@@ -52,6 +53,7 @@ export default function ProfilePage({
   const [postFile, setPostFile] = useState(null);
   const [posting, setPosting] = useState(false);
   const [ptab, setPtab] = useState("posts");
+  const [confirmUnfriend, setConfirmUnfriend] = useState(false);
   const postFileRef = useRef(null);
 
   const isSelf = String(userId) === String(currentUserId);
@@ -185,6 +187,27 @@ export default function ProfilePage({
             {friendStatus === "none" && (
               <button className="btn primary" onClick={() => onSendRequest(userId)}>
                 + Add Friend
+              </button>
+            )}
+            {friendStatus === "friends" && (
+              <button
+                className="btn small"
+                style={{ color: "var(--danger, #DC2626)" }}
+                onClick={async () => {
+                  if (confirmUnfriend) {
+                    try {
+                      await api.delete(`/friends/${userId}`);
+                    } catch { /* ignore */ }
+                    setFriendStatus("none");
+                    setConfirmUnfriend(false);
+                    onUnfriend?.(userId);
+                  } else {
+                    setConfirmUnfriend(true);
+                    setTimeout(() => setConfirmUnfriend(false), 3000);
+                  }
+                }}
+              >
+                {confirmUnfriend ? "Pakka unfriend? ✓" : "Unfriend"}
               </button>
             )}
             {friendStatus === "pending-sent" && (

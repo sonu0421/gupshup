@@ -898,3 +898,18 @@ input::placeholder, textarea::placeholder { color: #A6A8BC; }
   background: #FDECEC; border: 1px solid #F5C6C2; border-radius: 8px;
   padding: 6px 10px; cursor: pointer; width: 100%;
 }
+
+/* ---------- Chat options menu ---------- */
+.chat-menu {
+  position: absolute; top: 100%; right: 0; z-index: 50;
+  background: var(--surface); border: 1px solid var(--border);
+  border-radius: 12px; box-shadow: var(--shadow-md);
+  min-width: 160px; overflow: hidden;
+}
+.chat-menu-item {
+  display: block; width: 100%; text-align: left;
+  padding: 10px 14px; font-size: 14px; font-weight: 600;
+  background: none; border: none; cursor: pointer; color: var(--text);
+}
+.chat-menu-item:hover { background: var(--brand-soft); }
+.chat-menu-item.danger { color: var(--danger, #DC2626); }

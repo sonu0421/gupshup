@@ -2,7 +2,9 @@ import Message from "../models/Message.js";
 import Conversation from "../models/Conversation.js";
 import jwt from "jsonwebtoken";
 
-// Tracks who is currently online: userId -> socketId
+// Tracks who is currently online: userId -> Set of socketIds
+// (Set isliye taaki ek user phone+laptop dono par ho to ek ke band hone
+// par dusra abhi bhi online dikhe)
 const onlineUsers = new Map();
 
 // The io instance, so REST routes can emit real-time events (friend requests, …)
@@ -37,7 +39,8 @@ export function initSocket(io) {
     }
 
     // Mark user online, join their personal room
-    onlineUsers.set(String(userId), socket.id);
+    if (!onlineUsers.has(String(userId))) onlineUsers.set(String(userId), new Set());
+    onlineUsers.get(String(userId)).add(socket.id);
     socket.join(`user:${userId}`);
     io.emit("online-users", [...onlineUsers.keys()]);
 
@@ -91,6 +94,8 @@ export function initSocket(io) {
           image: image || null,
         });
         await Conversation.findByIdAndUpdate(conversationId, { lastMessage: message._id });
+        // Agar kisi ne ye chat delete (hide) ki thi to naya message aate hi wapas dikhao
+        await Conversation.findByIdAndUpdate(conversationId, { $set: { hiddenFor: [] } });
         const populated = await message.populate("sender", "name email avatar avatarColor");
         // clientTempId is NOT saved — just echoed so the sender can replace
         // its optimistic ("sending...") bubble with the real message
@@ -112,7 +117,12 @@ export function initSocket(io) {
     });
 
     socket.on("disconnect", () => {
-      onlineUsers.delete(String(userId));
+      // Sirf tab offline karo jab user ka KOI socket na bacha ho
+      const set = onlineUsers.get(String(userId));
+      if (set) {
+        set.delete(socket.id);
+        if (set.size === 0) onlineUsers.delete(String(userId));
+      }
       io.emit("online-users", [...onlineUsers.keys()]);
     });
   });
