@@ -215,6 +215,23 @@ export default function ProfilePage({
                 hidden
                 onChange={(e) => setPostFile(e.target.files[0] || null)}
               />
+              {postFile && (
+                <div style={{ marginTop: 10, position: "relative" }}>
+                  <img
+                    src={URL.createObjectURL(postFile)}
+                    alt="Preview"
+                    style={{ width: "100%", maxHeight: 220, objectFit: "cover", borderRadius: 12 }}
+                  />
+                  <button
+                    className="icon-btn"
+                    style={{ position: "absolute", top: 6, right: 6, background: "rgba(0,0,0,0.55)", color: "#fff" }}
+                    onClick={() => setPostFile(null)}
+                    aria-label="Remove photo"
+                  >
+                    ✕
+                  </button>
+                </div>
+              )}
               <input
                 placeholder="Write a caption…"
                 value={postCaption}
