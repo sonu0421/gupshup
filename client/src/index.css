@@ -935,3 +935,18 @@ input::placeholder, textarea::placeholder { color: #A6A8BC; }
 @media (hover: hover) {
   .swipe-row:hover .swipe-delete { width: 84px; }
 }
+
+/* ---------- Mobile swipe: vertical scroll + horizontal swipe dono ---------- */
+.swipe-row {
+  touch-action: pan-y; /* Vertical scroll allowed, horizontal JS handle karega */
+  -webkit-user-select: none; user-select: none;
+}
+.swipe-row .swipe-content {
+  touch-action: pan-y;
+}
+.swipe-delete {
+  min-height: 100%;
+  touch-action: manipulation;
+  font-size: 14px;
+  padding: 0 12px;
+}
