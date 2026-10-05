@@ -1,3 +1,17 @@
+// Convert a backend file path (/uploads/...) to a full URL.
+// Frontend lives on Vercel, files live on the Render backend — a relative
+// path would wrongly resolve against the frontend domain and 404.
+export function fileUrl(path) {
+  if (!path) return path;
+  if (path.startsWith("http://") || path.startsWith("https://") || path.startsWith("data:")) return path;
+  if (path.startsWith("/uploads/")) {
+    const apiUrl = import.meta.env.VITE_API_URL || "";
+    const origin = apiUrl.replace(/\/api\/?$/, ""); // strip trailing /api
+    if (origin) return origin + path;
+  }
+  return path;
+}
+
 export function convoName(convo, meId) {
   if (!convo) return "";
   if (convo.isGroup) return convo.name || "Group";

@@ -856,3 +856,19 @@ input::placeholder, textarea::placeholder { color: #A6A8BC; }
 .auth-divider::before, .auth-divider::after {
   content: ""; flex: 1; height: 1px; background: var(--border);
 }
+
+/* ---------- Pull to refresh ---------- */
+.ptr-wrap { position: relative; touch-action: pan-x pan-y; }
+/* fill mode: wrap takes full height (for ChatList-style fixed panels) */
+.ptr-wrap.fill { height: 100%; overflow: hidden; display: flex; flex-direction: column; }
+.ptr-wrap.fill > :last-child { flex: 1; min-height: 0; }
+.ptr-indicator { flex: none; }
+.ptr-indicator {
+  display: flex; align-items: center; justify-content: center; gap: 8px;
+  overflow: hidden; transition: height 0.18s ease, opacity 0.18s ease;
+  color: var(--brand); font-size: 13px; font-weight: 600;
+}
+.ptr-spinner { display: inline-block; font-size: 18px; transition: transform 0.2s ease; }
+.ptr-spinner.spinning { animation: ptrSpin 0.9s linear infinite; }
+@keyframes ptrSpin { to { transform: rotate(360deg); } }
+@media (prefers-reduced-motion: reduce) { .ptr-spinner.spinning { animation: none; } }

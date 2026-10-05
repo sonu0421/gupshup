@@ -3,6 +3,7 @@ import { useAuth } from "../context/AuthContext.jsx";
 import { getSocket, disconnectSocket } from "../socket.js";
 import api from "../api.js";
 import AppShell, { useIsMobile } from "../components/AppShell.jsx";
+import PullToRefresh from "../components/PullToRefresh.jsx";
 import ChatList from "../components/ChatList.jsx";
 import ChatWindow from "../components/ChatWindow.jsx";
 import Home from "../components/Home.jsx";
@@ -218,8 +219,11 @@ export default function Chat() {
   };
 
   // --- Render pieces ---
+  const refreshConvos = () =>
+    api.get("/conversations").then((res) => setConversations(res.data)).catch(() => {});
   const chatList = (
-    <ChatList
+    <PullToRefresh onRefresh={refreshConvos} className="fill">
+      <ChatList
       conversations={conversations}
       activeId={activeId}
       onSelect={openConvo}
@@ -234,6 +238,7 @@ export default function Chat() {
       people={people}
       onViewProfile={openProfile}
     />
+    </PullToRefresh>
   );
 
   const thread = (

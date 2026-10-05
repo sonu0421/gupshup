@@ -3,7 +3,8 @@ import api from "../api.js";
 import Avatar from "./Avatar.jsx";
 import { IconHeart } from "./icons.jsx";
 import { useAuth } from "../context/AuthContext.jsx";
-import { timeHM } from "../utils.js";
+import PullToRefresh from "./PullToRefresh.jsx";
+import { timeHM, fileUrl } from "../utils.js";
 
 // Home: FB/Insta style feed — friends' photo posts + everyone's notes, newest first.
 export default function Home({ onViewProfile }) {
@@ -61,7 +62,7 @@ export default function Home({ onViewProfile }) {
   const isMine = (item) => String(item.user._id || item.user) === String(user._id);
 
   return (
-    <>
+    <PullToRefresh onRefresh={load}>
       <div className="note-composer feed-composer">
         <div className="composer-row">
           <Avatar user={user} size={40} />
@@ -108,7 +109,7 @@ export default function Home({ onViewProfile }) {
 
             {item.kind === "post" ? (
               <>
-                <img src={item.image} alt="Post" className="feed-img" loading="lazy" />
+                <img src={fileUrl(item.image)} alt="Post" className="feed-img" loading="lazy" />
                 {item.caption && <p className="feed-caption">{item.caption}</p>}
               </>
             ) : (
@@ -128,6 +129,6 @@ export default function Home({ onViewProfile }) {
           </article>
         ))}
       </div>
-    </>
+    </PullToRefresh>
   );
 }

@@ -2,7 +2,7 @@ import { useEffect, useRef, useState } from "react";
 import api from "../api.js";
 import Avatar from "./Avatar.jsx";
 import { IconHeart, IconChevronLeft } from "./icons.jsx";
-import { timeHM } from "../utils.js";
+import { timeHM, fileUrl } from "../utils.js";
 
 // Full profile dashboard (FB/Insta style): header, stats, posts, notes.
 export default function ProfilePage({
@@ -236,7 +236,7 @@ export default function ProfilePage({
                       </button>
                     )}
                   </div>
-                  <img className="post-img" src={p.image} alt="post" loading="lazy" />
+                  <img className="post-img" src={fileUrl(p.image)} alt="post" loading="lazy" />
                   <div className="post-body">
                     {p.caption && <p className="post-caption">{p.caption}</p>}
                     <div className="post-actions">

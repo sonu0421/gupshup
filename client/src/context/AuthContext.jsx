@@ -16,7 +16,14 @@ export function AuthProvider({ children }) {
     api
       .get("/auth/me")
       .then((res) => setUser(res.data))
-      .catch(() => localStorage.removeItem("gupshup_token"))
+      .catch((err) => {
+        // Only forget the token when the server says it's invalid (401).
+        // Network hiccups / cold starts must NOT log the user out.
+        if (err.response?.status === 401) {
+          localStorage.removeItem("gupshup_token");
+          setUser(null);
+        }
+      })
       .finally(() => setLoading(false));
   }, []);
 

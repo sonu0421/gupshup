@@ -2,7 +2,7 @@ import { useEffect, useRef, useState } from "react";
 import { getSocket } from "../socket.js";
 import api from "../api.js";
 import { useAuth } from "../context/AuthContext.jsx";
-import { convoName, convoOther, timeHM, isSeenByAll } from "../utils.js";
+import { convoName, convoOther, timeHM, isSeenByAll, fileUrl } from "../utils.js";
 import { IconSend, IconImage, IconX, IconChat, IconChevronLeft, IconPhone, IconVideo } from "./icons.jsx";
 import Avatar from "./Avatar.jsx";
 
@@ -223,11 +223,11 @@ export default function ChatWindow({ convo, onlineUsers, onBack, onViewProfile }
                 {!mine && <div className="sender">{m.sender.name}</div>}
                 {m.image && (
                   <img
-                    src={m.image}
+                    src={fileUrl(m.image)}
                     alt="Shared photo"
                     className="bubble-img"
                     loading="lazy"
-                    onClick={() => setLightbox(m.image)}
+                    onClick={() => setLightbox(fileUrl(m.image))}
                   />
                 )}
                 {m.text && <div>{m.text}</div>}
