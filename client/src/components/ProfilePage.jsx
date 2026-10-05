@@ -3,6 +3,7 @@ import api from "../api.js";
 import Avatar from "./Avatar.jsx";
 import { IconHeart, IconChevronLeft } from "./icons.jsx";
 import { timeHM, fileUrl } from "../utils.js";
+import PullToRefresh from "./PullToRefresh.jsx";
 
 // Full profile dashboard (FB/Insta style): header, stats, posts, notes.
 export default function ProfilePage({
@@ -113,6 +114,7 @@ export default function ProfilePage({
   }
 
   return (
+    <PullToRefresh onRefresh={load}>
     <main className="profile-page">
       {onBack && (
         <header className="chat-head">
@@ -306,5 +308,6 @@ export default function ProfilePage({
         )}
       </div>
     </main>
+    </PullToRefresh>
   );
 }

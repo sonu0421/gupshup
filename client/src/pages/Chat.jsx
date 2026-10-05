@@ -346,12 +346,14 @@ export default function Chat() {
               <h2>Friend requests</h2>
               <p>{requests.length === 0 ? "You're all caught up! ✨" : `${requests.length} waiting for you`}</p>
             </div>
-            <Requests
-              requests={requests}
-              onAccept={acceptRequest}
-              onReject={rejectRequest}
-              onViewProfile={(u) => openProfile(u._id || u)}
-            />
+            <PullToRefresh onRefresh={async () => { refreshSocial(); }}>
+              <Requests
+                requests={requests}
+                onAccept={acceptRequest}
+                onReject={rejectRequest}
+                onViewProfile={(u) => openProfile(u._id || u)}
+              />
+            </PullToRefresh>
           </div>
         )}
 
