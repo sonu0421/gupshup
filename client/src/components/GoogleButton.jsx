@@ -49,9 +49,10 @@ export default function GoogleButton({ onDone }) {
           },
         });
         if (btnRef.current && !cancelled) {
-          // Fit the button to its container so it never overflows on small phones
-          const containerW = btnRef.current.parentElement?.clientWidth || 320;
-          const w = Math.max(200, Math.min(320, Math.floor(containerW)));
+          // Measure the VISIBLE container width so the button fits on small phones.
+          // (offsetWidth works because the container is rendered visibly, not display:none.)
+          const containerW = btnRef.current.offsetWidth || 280;
+          const w = Math.max(200, Math.min(320, containerW));
           window.google.accounts.id.renderButton(btnRef.current, {
             theme: "outline",
             size: "large",
@@ -70,18 +71,12 @@ export default function GoogleButton({ onDone }) {
     };
   }, []);
 
-  if (!ready && !error) {
-    // Render the container hidden so btnRef exists when the effect runs —
-    // otherwise renderButton has nowhere to mount and the button never appears.
-    return (
-      <div style={{ display: "none", width: "100%" }}>
-        <div ref={btnRef} />
-      </div>
-    );
-  }
+  // Always render the container visibly (min-height avoids layout jump) so the
+  // effect can measure its real width and fit the Google button on small phones.
+  // If Google isn't configured, the effect returns early and this stays empty.
   return (
-    <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 8, width: "100%" }}>
-      <div ref={btnRef} style={{ width: "100%", display: "flex", justifyContent: "center" }} />
+    <div style={{ width: "100%", display: ready || error ? "flex" : "block", flexDirection: "column", alignItems: "center", gap: 8, minHeight: ready || error ? 0 : 44 }}>
+      <div ref={btnRef} style={{ width: "100%", maxWidth: 320, margin: "0 auto" }} />
       {error && <div className="error">{error}</div>}
     </div>
   );
