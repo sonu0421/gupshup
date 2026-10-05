@@ -1,0 +1,16 @@
+# Dependencies
+node_modules/
+
+# Production build output (rebuild with `npm run build` in client/)
+client/dist/
+
+# Uploaded files (user content, not code)
+server/uploads/*
+
+# Secrets — NEVER commit these
+server/.env
+.env
+
+# Logs & OS junk
+*.log
+.DS_Store
