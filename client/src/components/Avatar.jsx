@@ -9,12 +9,16 @@ export default function Avatar({ user, size = 40 }) {
   useEffect(() => {
     setImgBroken(false);
   }, [user?.avatar]);
-  const isPhoto = user?.avatar?.startsWith("/uploads/") || user?.avatar?.startsWith("http") || user?.avatar?.startsWith("blob:");
+  const av = user?.avatar || "";
+  // Photo hai ya emoji/initial? (/uploads/ ya uploads/ dono handle karo)
+  const isPhoto = av.startsWith("/uploads/") || av.startsWith("uploads/") || av.startsWith("http") || av.startsWith("blob:") || av.startsWith("data:");
   if (isPhoto && !imgBroken) {
+    // Leading slash missing ho to add karo
+    const src = av.startsWith("uploads/") ? "/" + av : av;
     return (
       <img
         className="avatar avatar-img"
-        src={fileUrl(user.avatar)}
+        src={fileUrl(src)}
         style={dim}
         alt={user?.name || "User"}
         // Agar photo file na mile (purana upload wipe ho gaya ho) to tooti
@@ -23,7 +27,7 @@ export default function Avatar({ user, size = 40 }) {
       />
     );
   }
-  if (user?.avatar) {
+  if (av && !isPhoto) {
     return (
       <span className="avatar avatar-emoji" style={dim}>
         {user.avatar}
