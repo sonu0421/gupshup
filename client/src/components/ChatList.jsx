@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useRef } from "react";
 import api from "../api.js";
 import { useAuth } from "../context/AuthContext.jsx";
 import { convoName, convoOther, timeHM } from "../utils.js";
@@ -31,19 +31,44 @@ export default function ChatList({
   const [showGroup, setShowGroup] = useState(false);
   const [groupName, setGroupName] = useState("");
   const [selected, setSelected] = useState([]);
+  const [groupQuery, setGroupQuery] = useState("");
+  const [groupResults, setGroupResults] = useState([]);
+  const searchTimer = useRef(null);
 
-  const search = async (q) => {
+  // Debounced search — har letter par API call nahi, 300ms ruk ke
+  const search = (q) => {
     setQuery(q);
+    if (searchTimer.current) clearTimeout(searchTimer.current);
     if (!q.trim()) {
       setResults([]);
       return;
     }
-    try {
-      const { data } = await api.get(`/auth/users?q=${encodeURIComponent(q)}`);
-      setResults(data);
-    } catch {
-      /* ignore */
+    searchTimer.current = setTimeout(async () => {
+      try {
+        const { data } = await api.get(`/auth/users?q=${encodeURIComponent(q)}`);
+        setResults(data);
+      } catch {
+        /* ignore */
+      }
+    }, 300);
+  };
+
+  // Group ke liye alag search
+  const searchGroup = (q) => {
+    setGroupQuery(q);
+    if (searchTimer.current) clearTimeout(searchTimer.current);
+    if (!q.trim()) {
+      setGroupResults([]);
+      return;
     }
+    searchTimer.current = setTimeout(async () => {
+      try {
+        const { data } = await api.get(`/auth/users?q=${encodeURIComponent(q)}`);
+        setGroupResults(data);
+      } catch {
+        /* ignore */
+      }
+    }, 300);
   };
 
   const startChat = async (otherId) => {
@@ -60,16 +85,23 @@ export default function ChatList({
 
   const createGroup = async () => {
     if (!groupName.trim() || selected.length === 0) return;
-    const { data } = await api.post("/conversations/group", {
-      name: groupName.trim(),
-      userIds: selected,
-    });
-    onNewConvo(data);
+    try {
+      const { data } = await api.post("/conversations/group", {
+        name: groupName.trim(),
+        userIds: selected,
+      });
+      onNewConvo(data);
+    } catch (err) {
+      alert(err.response?.data?.message || "Group nahi ban paya");
+      return;
+    }
     setShowGroup(false);
     setGroupName("");
     setSelected([]);
     setQuery("");
     setResults([]);
+    setGroupQuery("");
+    setGroupResults([]);
   };
 
   const q = query.trim().toLowerCase();
@@ -127,47 +159,58 @@ export default function ChatList({
       {showGroup && (
         <div style={{ padding: "0 16px 10px" }}>
           <div className="feed-card" style={{ padding: 14 }}>
-            <div style={{ fontWeight: 800, fontSize: 16, marginBottom: 10 }}>👥 New Group</div>
+            <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 10 }}>
+              <div style={{ fontWeight: 800, fontSize: 16 }}>👥 New Group</div>
+              <button className="icon-btn" onClick={() => { setShowGroup(false); setGroupQuery(""); setGroupResults([]); setSelected([]); }} aria-label="Close">✕</button>
+            </div>
             <input
-              placeholder="Group name likho…"
+              placeholder="Group ka naam likho…"
               value={groupName}
               onChange={(e) => setGroupName(e.target.value)}
               style={{ marginBottom: 8 }}
             />
-            <div className="muted small" style={{ marginBottom: 8 }}>
-              🔍 Upar search karo, phir members tick karo:
+            {/* Group ke andar apna search box! */}
+            <div className="chatlist-search" style={{ marginBottom: 8 }}>
+              <IconSearch width={15} height={15} />
+              <input
+                placeholder="Members dhoondo… (naam likho)"
+                value={groupQuery}
+                onChange={(e) => searchGroup(e.target.value)}
+              />
             </div>
             {selected.length > 0 && (
               <div style={{ marginBottom: 8, fontWeight: 700, color: "var(--brand)" }}>
                 ✓ {selected.length} member{selected.length > 1 ? "s" : ""} selected
               </div>
             )}
-            {results.length === 0 && query.trim() && (
-              <div className="muted small" style={{ padding: "8px 0" }}>Koi nahi mila — naam se search karo</div>
+            {groupQuery.trim() && groupResults.length === 0 && (
+              <div className="muted small" style={{ padding: "8px 0" }}>"{groupQuery}" se koi nahi mila</div>
             )}
-            {results.map((u) => (
-              <label key={u._id} className="member-row" style={{ display: "flex", gap: 8, alignItems: "center", padding: "8px 0", cursor: "pointer" }}>
+            <div style={{ maxHeight: 200, overflowY: "auto" }}>
+            {groupResults.map((u) => (
+              <label key={u._id} className="member-row" style={{ display: "flex", gap: 8, alignItems: "center", padding: "8px 4px", cursor: "pointer", borderRadius: 8 }}>
                 <input
                   type="checkbox"
                   checked={selected.includes(u._id)}
                   onChange={() => toggleSelect(u._id)}
-                  style={{ width: 20, height: 20 }}
+                  style={{ width: 22, height: 22 }}
                 />
                 <Avatar user={u} size={36} />
                 <span style={{ fontWeight: 600 }}>{u.name}</span>
               </label>
             ))}
+            </div>
             <button
               className="btn primary block"
               onClick={createGroup}
               disabled={!groupName.trim() || selected.length === 0}
-              style={{ marginTop: 12, opacity: (!groupName.trim() || selected.length === 0) ? 0.5 : 1 }}
+              style={{ marginTop: 12, opacity: (!groupName.trim() || selected.length === 0) ? 0.5 : 1, fontSize: 16, padding: "12px" }}
             >
-              {selected.length > 0 ? `Create Group (${selected.length})` : "Create Group"}
+              {selected.length > 0 ? `🎉 Create Group (${selected.length})` : "Create Group"}
             </button>
             {(!groupName.trim() || selected.length === 0) && (
               <div className="muted small" style={{ marginTop: 6, textAlign: "center" }}>
-                {!groupName.trim() ? "Pehle group ka naam likho" : "Kam se kam 1 member tick karo"}
+                {!groupName.trim() ? "⬆️ Pehle group ka naam likho" : "⬆️ Upar search karke members tick karo"}
               </div>
             )}
           </div>
