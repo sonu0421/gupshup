@@ -7,6 +7,7 @@ import { authRequired as auth } from "../middleware/auth.js";
 import mongoose from "mongoose";
 import User from "../models/User.js";
 import FriendRequest from "../models/FriendRequest.js";
+import { getIO } from "../socket/index.js";
 
 const router = express.Router();
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
@@ -95,6 +96,18 @@ router.put("/me", auth, async (req, res) => {
   if (avatarColor !== undefined) u.avatarColor = String(avatarColor).slice(0, 20);
   if (isPrivate !== undefined) u.isPrivate = !!isPrivate;
   await u.save();
+  // Real-time: sabko batao DP/bio badli taaki har jagah turant update ho
+  try {
+    getIO()?.emit("profile-updated", {
+      userId: String(u._id),
+      name: u.name,
+      avatar: u.avatar,
+      avatarColor: u.avatarColor,
+      bio: u.bio,
+    });
+  } catch {
+    /* socket not ready — ignore */
+  }
   res.json({
     _id: u._id,
     name: u.name,
@@ -114,6 +127,18 @@ router.post("/me/avatar", auth, (req, res) => {
     const u = await User.findById(req.userId);
     u.avatar = `/uploads/${req.file.filename}`;
     await u.save();
+    // Real-time: sabko nayi DP turant dikhe
+    try {
+      getIO()?.emit("profile-updated", {
+        userId: String(u._id),
+        name: u.name,
+        avatar: u.avatar,
+        avatarColor: u.avatarColor,
+        bio: u.bio,
+      });
+    } catch {
+      /* ignore */
+    }
     res.json({ avatar: u.avatar });
   });
 });

@@ -138,12 +138,35 @@ export default function Chat() {
       api.get("/users").then((res) => setPeople(res.data)).catch(() => {});
     };
 
+    // Kisi ne DP/bio badli → Discover, Chat list, sab jagah turant update karo
+    const onProfileUpdated = ({ userId, name, avatar, avatarColor, bio }) => {
+      const uid = String(userId);
+      setPeople((prev) =>
+        prev.map((p) => (String(p._id) === uid ? { ...p, name, avatar, avatarColor, bio } : p))
+      );
+      setConversations((prev) =>
+        prev.map((c) => ({
+          ...c,
+          participants: (c.participants || []).map((pt) => {
+            const pid = String(pt._id || pt);
+            return pid === uid ? { ...pt, name, avatar, avatarColor } : pt;
+          }),
+        }))
+      );
+      // Apni khud ki DP ho to header/composer bhi turant update karo
+      if (uid === String(user._id)) {
+        updateUser({ name, avatar, avatarColor, bio });
+        setMe((prev) => (prev ? { ...prev, name, avatar, avatarColor, bio } : prev));
+      }
+    };
+
     socket.on("online-users", onOnline);
     socket.on("conversation-updated", onUpdated);
     socket.on("friend-request", onFriendRequest);
     socket.on("friend-accepted", onFriendAccepted);
     socket.on("notification", onNotification);
     socket.on("user-joined", onUserJoined);
+    socket.on("profile-updated", onProfileUpdated);
     // Reconnected after a drop → re-fetch so nothing sent in-between is missed
     const onReconnect = () => {
       load();
@@ -159,6 +182,7 @@ export default function Chat() {
       socket.off("friend-accepted", onFriendAccepted);
       socket.off("notification", onNotification);
       socket.off("user-joined", onUserJoined);
+      socket.off("profile-updated", onProfileUpdated);
       unsubConn();
       disconnectSocket();
     };
