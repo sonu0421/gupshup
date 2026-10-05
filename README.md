@@ -1,5 +1,7 @@
 # Gupshup — Real-time Chat App
 
+**🌐 Live Demo: https://gupshuplive.vercel.app**
+
 A full-stack MERN chat application with real-time messaging powered by **Socket.io**.
 Built as a BTech final-year / semester project.
 
