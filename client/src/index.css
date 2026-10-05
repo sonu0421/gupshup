@@ -924,12 +924,14 @@ input::placeholder, textarea::placeholder { color: #A6A8BC; }
   transition: width 0.18s ease;
 }
 .swipe-content { transition: transform 0.18s ease; background: var(--surface); position: relative; }
-/* Desktop: hover par delete dikhao */
-@media (hover: hover) {
-  .swipe-row .swipe-delete { width: 0; }
-  .swipe-row:hover .swipe-delete { width: 84px !important; }
-}
-
 /* ---------- Clickable stat ---------- */
 .stat-btn { background: none; border: none; cursor: pointer; font: inherit; color: inherit; padding: 0; }
 .stat-btn:hover b { color: var(--brand); }
+
+/* ---------- Swipe to delete (fixed) ---------- */
+.swipe-row .swipe-delete { width: 0; }
+.swipe-row .swipe-delete.swipe-open { width: 84px; }
+/* Desktop: hover par delete dikhao */
+@media (hover: hover) {
+  .swipe-row:hover .swipe-delete { width: 84px; }
+}

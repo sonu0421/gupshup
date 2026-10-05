@@ -50,8 +50,7 @@ export default function SwipeableRow({ onDelete, deleteLabel = "Delete", childre
       onTouchEnd={onTouchEnd}
     >
       <div
-        className="swipe-delete"
-        style={{ width: offset < -10 || confirming ? DELETE_WIDTH : 0 }}
+        className={`swipe-delete ${offset < -10 || confirming ? "swipe-open" : ""}`}
         onClick={handleDelete}
       >
         {confirming ? "Pakka? ✓" : `🗑️ ${deleteLabel}`}

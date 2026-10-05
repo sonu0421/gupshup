@@ -1,10 +1,14 @@
 // Renders a user avatar: uploaded photo, emoji, or initial letter.
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { fileUrl } from "../utils.js";
 
 export default function Avatar({ user, size = 40 }) {
   const dim = { width: size, height: size, fontSize: Math.round(size * 0.45) };
   const [imgBroken, setImgBroken] = useState(false);
+  // Avatar URL badle to error state reset karo (nayi photo try karo)
+  useEffect(() => {
+    setImgBroken(false);
+  }, [user?.avatar]);
   const isPhoto = user?.avatar?.startsWith("/uploads/") || user?.avatar?.startsWith("http") || user?.avatar?.startsWith("blob:");
   if (isPhoto && !imgBroken) {
     return (
@@ -12,7 +16,7 @@ export default function Avatar({ user, size = 40 }) {
         className="avatar avatar-img"
         src={fileUrl(user.avatar)}
         style={dim}
-        alt={user.name}
+        alt={user?.name || "User"}
         // Agar photo file na mile (purana upload wipe ho gaya ho) to tooti
         // image ki jagah naam ka pehla akshar dikhao
         onError={() => setImgBroken(true)}
