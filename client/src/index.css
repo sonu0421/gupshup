@@ -950,3 +950,14 @@ input::placeholder, textarea::placeholder { color: #A6A8BC; }
   font-size: 14px;
   padding: 0 12px;
 }
+
+/* ---------- Clickable friend row (connections modal) ---------- */
+.person-row-btn {
+  width: 100%; background: none; border: none; cursor: pointer;
+  font: inherit; color: inherit; text-align: left;
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 8px; border-radius: 12px;
+  /* Mobile par bada tap target */
+  min-height: 56px;
+}
+.person-row-btn:hover, .person-row-btn:active { background: var(--brand-soft); }

@@ -43,6 +43,7 @@ export default function ProfilePage({
   onGoRequests,
   onLogout,
   onUnfriend,
+  onViewProfile,
 }) {
   const [profile, setProfile] = useState(null);
   const [friendStatus, setFriendStatus] = useState("none");
@@ -402,7 +403,14 @@ export default function ProfilePage({
               </p>
             ) : (
               friendsList.map((f) => (
-                <div key={f._id} className="person-row">
+                <button
+                  key={f._id}
+                  className="person-row person-row-btn"
+                  onClick={() => {
+                    setShowFriends(false);
+                    onViewProfile?.(f._id);
+                  }}
+                >
                   <span className="person-id">
                     <Avatar user={f} size={40} />
                     <span className="person-meta">
@@ -410,7 +418,8 @@ export default function ProfilePage({
                       <span className="muted small ellipsis">{f.bio || "Hey, I'm on Gupshup!"}</span>
                     </span>
                   </span>
-                </div>
+                  <span className="muted">›</span>
+                </button>
               ))
             )}
           </div>

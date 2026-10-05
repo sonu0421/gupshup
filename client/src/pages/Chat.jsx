@@ -409,6 +409,7 @@ export default function Chat() {
               onGoRequests={() => handleTabChange("requests")}
               onLogout={logout}
               onUnfriend={() => refreshSocial()}
+              onViewProfile={openProfile}
             />
           </div>
         )}
@@ -443,6 +444,7 @@ export default function Chat() {
                 handleTabChange("requests");
               }}
               onUnfriend={() => refreshSocial()}
+              onViewProfile={openProfile}
             />
           </div>
         </div>
