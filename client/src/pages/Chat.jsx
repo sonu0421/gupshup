@@ -132,11 +132,17 @@ export default function Chat() {
       playPing();
     };
 
+    // Naya user register kare to Discover list turant update ho
+    const onUserJoined = () => {
+      api.get("/users").then((res) => setPeople(res.data)).catch(() => {});
+    };
+
     socket.on("online-users", onOnline);
     socket.on("conversation-updated", onUpdated);
     socket.on("friend-request", onFriendRequest);
     socket.on("friend-accepted", onFriendAccepted);
     socket.on("notification", onNotification);
+    socket.on("user-joined", onUserJoined);
     // Reconnected after a drop → re-fetch so nothing sent in-between is missed
     const onReconnect = () => {
       load();
@@ -151,6 +157,7 @@ export default function Chat() {
       socket.off("friend-request", onFriendRequest);
       socket.off("friend-accepted", onFriendAccepted);
       socket.off("notification", onNotification);
+      socket.off("user-joined", onUserJoined);
       unsubConn();
       disconnectSocket();
     };
@@ -320,14 +327,16 @@ export default function Chat() {
               <h2>Discover people</h2>
               <p>Grow your network — find creators, engineers and friends.</p>
             </div>
-            <Discover
-              users={people}
-              onViewProfile={(u) => openProfile(u._id)}
-              onSendRequest={sendRequest}
-              onAccept={acceptRequest}
-              onReject={rejectRequest}
-              onMessage={openDirectChat}
-            />
+            <PullToRefresh onRefresh={async () => { refreshSocial(); }}>
+              <Discover
+                users={people}
+                onViewProfile={(u) => openProfile(u._id)}
+                onSendRequest={sendRequest}
+                onAccept={acceptRequest}
+                onReject={rejectRequest}
+                onMessage={openDirectChat}
+              />
+            </PullToRefresh>
           </div>
         )}
 
@@ -355,6 +364,7 @@ export default function Chat() {
               onSendRequest={sendRequest}
               onMessage={openDirectChat}
               onGoRequests={() => handleTabChange("requests")}
+              onLogout={logout}
             />
           </div>
         )}

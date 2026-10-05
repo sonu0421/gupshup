@@ -13,6 +13,7 @@ export default function ProfilePage({
   onSendRequest,
   onMessage,
   onGoRequests,
+  onLogout,
 }) {
   const [profile, setProfile] = useState(null);
   const [friendStatus, setFriendStatus] = useState("none");
@@ -167,6 +168,18 @@ export default function ProfilePage({
               </button>
             )}
           </div>
+        )}
+
+        {isSelf && onLogout && (
+          <button
+            className="btn"
+            style={{ width: "100%", marginTop: 4, color: "var(--danger, #DC2626)" }}
+            onClick={() => {
+              if (confirm("Log out kar dein?")) onLogout();
+            }}
+          >
+            ⎋ Log out
+          </button>
         )}
 
         <div className="chip-row" style={{ marginBottom: 4 }}>

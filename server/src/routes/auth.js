@@ -5,6 +5,7 @@ import rateLimit from "express-rate-limit";
 import { OAuth2Client } from "google-auth-library";
 import User from "../models/User.js";
 import { authRequired } from "../middleware/auth.js";
+import { getIO } from "../socket/index.js";
 
 const router = Router();
 const googleClient = new OAuth2Client(process.env.GOOGLE_CLIENT_ID);
@@ -43,6 +44,12 @@ router.post("/register", authLimiter, async (req, res) => {
     if (exists) return res.status(400).json({ message: "Email already registered" });
     const hash = await bcrypt.hash(password, 10);
     const user = await User.create({ name, email, password: hash });
+    // Real-time: tell everyone a new user joined so Discover updates live
+    try {
+      getIO()?.emit("user-joined", { _id: user._id, name: user.name });
+    } catch {
+      /* socket not ready — ignore */
+    }
     res.status(201).json({ token: signToken(user._id), user: publicUser(user) });
   } catch (err) {
     res.status(500).json({ message: "Server error" });

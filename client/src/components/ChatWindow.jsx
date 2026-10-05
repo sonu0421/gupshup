@@ -162,9 +162,10 @@ export default function ChatWindow({ convo, onlineUsers, onBack, onViewProfile }
     try {
       const form = new FormData();
       form.append("image", file);
-      const { data } = await api.post("/messages/upload", form, {
-        headers: { "Content-Type": "multipart/form-data" },
-      });
+      // NOTE: Content-Type header manually set MAT karo — browser khud
+      // "multipart/form-data; boundary=..." lagata hai. Manual header se
+      // boundary missing ho jati hai aur multer upload fail kar deta hai.
+      const { data } = await api.post("/messages/upload", form);
       getSocket().emit("send-message", {
         conversationId: convoId,
         text: "",
