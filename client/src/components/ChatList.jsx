@@ -31,8 +31,6 @@ export default function ChatList({
   const [showGroup, setShowGroup] = useState(false);
   const [groupName, setGroupName] = useState("");
   const [selected, setSelected] = useState([]);
-  const [groupQuery, setGroupQuery] = useState("");
-  const [groupResults, setGroupResults] = useState([]);
   const searchTimer = useRef(null);
 
   // Debounced search — har letter par API call nahi, 300ms ruk ke
@@ -47,24 +45,6 @@ export default function ChatList({
       try {
         const { data } = await api.get(`/auth/users?q=${encodeURIComponent(q)}`);
         setResults(data);
-      } catch {
-        /* ignore */
-      }
-    }, 300);
-  };
-
-  // Group ke liye alag search
-  const searchGroup = (q) => {
-    setGroupQuery(q);
-    if (searchTimer.current) clearTimeout(searchTimer.current);
-    if (!q.trim()) {
-      setGroupResults([]);
-      return;
-    }
-    searchTimer.current = setTimeout(async () => {
-      try {
-        const { data } = await api.get(`/auth/users?q=${encodeURIComponent(q)}`);
-        setGroupResults(data);
       } catch {
         /* ignore */
       }
@@ -100,8 +80,6 @@ export default function ChatList({
     setSelected([]);
     setQuery("");
     setResults([]);
-    setGroupQuery("");
-    setGroupResults([]);
   };
 
   const q = query.trim().toLowerCase();
@@ -161,7 +139,7 @@ export default function ChatList({
           <div className="feed-card" style={{ padding: 14 }}>
             <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 10 }}>
               <div style={{ fontWeight: 800, fontSize: 16 }}>👥 New Group</div>
-              <button className="icon-btn" onClick={() => { setShowGroup(false); setGroupQuery(""); setGroupResults([]); setSelected([]); }} aria-label="Close">✕</button>
+              <button className="icon-btn" onClick={() => { setShowGroup(false); setSelected([]); }} aria-label="Close">✕</button>
             </div>
             <input
               placeholder="👥 Group ka naam likho… (zaroori!)"
@@ -170,25 +148,22 @@ export default function ChatList({
               style={{ marginBottom: 8, borderColor: !groupName.trim() ? "var(--danger)" : undefined, borderWidth: !groupName.trim() ? 2 : undefined }}
               autoFocus
             />
-            {/* Group ke andar apna search box! */}
-            <div className="chatlist-search" style={{ marginBottom: 8 }}>
-              <IconSearch width={15} height={15} />
-              <input
-                placeholder="Members dhoondo… (naam likho)"
-                value={groupQuery}
-                onChange={(e) => searchGroup(e.target.value)}
-              />
+            <div className="muted small" style={{ marginBottom: 8 }}>
+              🔍 <b>Upar wale search box</b> me naam likho, phir yahan tick karo:
             </div>
             {selected.length > 0 && (
               <div style={{ marginBottom: 8, fontWeight: 700, color: "var(--brand)" }}>
                 ✓ {selected.length} member{selected.length > 1 ? "s" : ""} selected
               </div>
             )}
-            {groupQuery.trim() && groupResults.length === 0 && (
-              <div className="muted small" style={{ padding: "8px 0" }}>"{groupQuery}" se koi nahi mila</div>
+            {query.trim() && results.length === 0 && (
+              <div className="muted small" style={{ padding: "8px 0" }}>"{query}" se koi nahi mila</div>
+            )}
+            {!query.trim() && (
+              <div className="muted small" style={{ padding: "8px 0" }}>⬆️ Upar search karo members ke liye</div>
             )}
             <div style={{ maxHeight: 200, overflowY: "auto" }}>
-            {groupResults.map((u) => (
+            {results.map((u) => (
               <label key={u._id} className="member-row" style={{ display: "flex", gap: 8, alignItems: "center", padding: "8px 4px", cursor: "pointer", borderRadius: 8 }}>
                 <input
                   type="checkbox"

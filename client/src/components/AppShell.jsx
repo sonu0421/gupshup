@@ -159,6 +159,11 @@ export default function AppShell({
         <div className="d-main">
           <ConnectionBanner />
           <div className="d-topbar">
+            <div className="d-search" onClick={onNewMessage}>
+              <IconSearch width={17} height={17} />
+              <span>Search chats, people…</span>
+              <kbd>⌘K</kbd>
+            </div>
             <div className="spacer" />
             <button className="btn primary small" onClick={onNewMessage}>
               <span style={{ display: "inline-flex", alignItems: "center", gap: 6 }}>
