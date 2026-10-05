@@ -872,3 +872,15 @@ input::placeholder, textarea::placeholder { color: #A6A8BC; }
 .ptr-spinner.spinning { animation: ptrSpin 0.9s linear infinite; }
 @keyframes ptrSpin { to { transform: rotate(360deg); } }
 @media (prefers-reduced-motion: reduce) { .ptr-spinner.spinning { animation: none; } }
+
+/* ---------- Connection status banner ---------- */
+.conn-banner {
+  display: flex; align-items: center; justify-content: center; gap: 8px;
+  padding: 7px 12px; font-size: 12.5px; font-weight: 600;
+  background: #FFF7E6; color: #9A6B00; border-bottom: 1px solid #F0DFB0;
+  flex: none;
+}
+.conn-banner.disconnected { background: #FDECEC; color: #B3261E; border-bottom-color: #F5C6C2; }
+.conn-dot { width: 8px; height: 8px; border-radius: 50%; background: currentColor; animation: connPulse 1.2s ease-in-out infinite; }
+@keyframes connPulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.35; } }
+@media (prefers-reduced-motion: reduce) { .conn-dot { animation: none; } }

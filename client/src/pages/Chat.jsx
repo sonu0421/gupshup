@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import { useAuth } from "../context/AuthContext.jsx";
-import { getSocket, disconnectSocket } from "../socket.js";
+import { getSocket, disconnectSocket, onConnectionChange } from "../socket.js";
 import api from "../api.js";
 import AppShell, { useIsMobile } from "../components/AppShell.jsx";
 import PullToRefresh from "../components/PullToRefresh.jsx";
@@ -137,12 +137,21 @@ export default function Chat() {
     socket.on("friend-request", onFriendRequest);
     socket.on("friend-accepted", onFriendAccepted);
     socket.on("notification", onNotification);
+    // Reconnected after a drop → re-fetch so nothing sent in-between is missed
+    const onReconnect = () => {
+      load();
+      refreshSocial();
+    };
+    const unsubConn = onConnectionChange((s) => {
+      if (s === "connected") onReconnect();
+    });
     return () => {
       socket.off("online-users", onOnline);
       socket.off("conversation-updated", onUpdated);
       socket.off("friend-request", onFriendRequest);
       socket.off("friend-accepted", onFriendAccepted);
       socket.off("notification", onNotification);
+      unsubConn();
       disconnectSocket();
     };
   }, [user._id]);

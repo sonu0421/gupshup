@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import Avatar from "./Avatar.jsx";
+import ConnectionBanner from "./ConnectionBanner.jsx";
 import {
   IconHome, IconChat, IconCompass, IconUserPlus, IconBell,
   IconUser, IconSearch, IconPlus,
@@ -74,6 +75,7 @@ export default function AppShell({
   if (isMobile) {
     return (
       <div className="app-shell">
+        <ConnectionBanner />
         <header className="m-topbar">
           <span className="m-brand">Gupshup</span>
           <span className="m-title">{TAB_TITLES[tab] || ""}</span>
@@ -155,6 +157,7 @@ export default function AppShell({
         </aside>
 
         <div className="d-main">
+          <ConnectionBanner />
           <div className="d-topbar">
             <div className="d-search" onClick={onNewMessage}>
               <IconSearch width={17} height={17} />
