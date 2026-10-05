@@ -67,7 +67,15 @@ export default function GoogleButton({ onDone }) {
     };
   }, []);
 
-  if (!ready && !error) return null;
+  if (!ready && !error) {
+    // Render the container hidden so btnRef exists when the effect runs —
+    // otherwise renderButton has nowhere to mount and the button never appears.
+    return (
+      <div style={{ display: "none" }}>
+        <div ref={btnRef} />
+      </div>
+    );
+  }
   return (
     <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 8 }}>
       <div ref={btnRef} />
