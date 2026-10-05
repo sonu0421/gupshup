@@ -50,8 +50,13 @@ export function AuthProvider({ children }) {
     setUser(userData);
   };
 
+  // Profile edit ke baad header/composer sab jagah nayi DP turant dikhe
+  const updateUser = (patch) => {
+    setUser((prev) => (prev ? { ...prev, ...patch } : prev));
+  };
+
   return (
-    <AuthContext.Provider value={{ user, loading, login, register, logout, loginWithToken }}>
+    <AuthContext.Provider value={{ user, loading, login, register, logout, loginWithToken, updateUser }}>
       {children}
     </AuthContext.Provider>
   );

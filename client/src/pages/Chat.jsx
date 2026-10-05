@@ -16,7 +16,7 @@ import NewMessageModal from "../components/NewMessageModal.jsx";
 import { playPing } from "../utils.js";
 
 export default function Chat() {
-  const { user, logout } = useAuth();
+  const { user, logout, updateUser } = useAuth();
   const isMobile = useIsMobile();
   const [conversations, setConversations] = useState([]);
   const [activeId, setActiveId] = useState(null);
@@ -195,6 +195,7 @@ export default function Chat() {
 
   const saveProfile = (updated) => {
     setMe(updated);
+    updateUser({ avatar: updated.avatar, avatarColor: updated.avatarColor, bio: updated.bio });
     setEditingProfile(false);
     refreshSocial();
   };
