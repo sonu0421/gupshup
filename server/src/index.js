@@ -1,5 +1,10 @@
 import "dotenv/config";
 import express from "express";
+// Safety net: one bad request must never crash the whole server.
+// (Express 4 doesn't forward async throws to the error handler.)
+process.on("unhandledRejection", (err) => {
+  console.error("Unhandled rejection (server kept alive):", err?.message);
+});
 import cors from "cors";
 import helmet from "helmet";
 import path from "path";

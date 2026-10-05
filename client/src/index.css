@@ -119,10 +119,72 @@ input::placeholder, textarea::placeholder { color: #A6A8BC; }
 .auth-wrap {
   display: flex; align-items: center; justify-content: center;
   min-height: 100vh; padding: 20px;
+  position: relative; overflow: hidden;
   background:
     radial-gradient(700px 400px at 15% 10%, rgba(99, 91, 255, 0.10), transparent 60%),
     radial-gradient(600px 400px at 90% 90%, rgba(255, 107, 138, 0.08), transparent 60%),
     var(--canvas);
+}
+/* ---------- 3D decor: orbs + butterflies (auth pages) ---------- */
+.auth-decor { position: absolute; inset: 0; pointer-events: none; overflow: hidden; }
+.auth-card { position: relative; z-index: 2; }
+.orb { position: absolute; border-radius: 50%; filter: blur(70px); opacity: 0.45; animation: orbFloat 12s ease-in-out infinite alternate; }
+.orb-1 { width: 320px; height: 320px; background: #635BFF; top: -90px; left: -90px; }
+.orb-2 { width: 260px; height: 260px; background: #FF6B8A; bottom: -70px; right: -70px; animation-delay: -4s; }
+.orb-3 { width: 190px; height: 190px; background: #7DD3FC; top: 42%; left: 62%; opacity: 0.32; animation-delay: -8s; }
+@keyframes orbFloat {
+  from { transform: translate3d(0, 0, 0) scale(1); }
+  to { transform: translate3d(46px, -34px, 0) scale(1.16); }
+}
+.butterfly { position: absolute; width: 38px; height: 30px; }
+.butterfly .wing { position: absolute; top: 0; width: 19px; height: 30px; }
+.butterfly .wing.left {
+  left: 0; border-radius: 95% 8% 95% 8%;
+  background: linear-gradient(135deg, #FF9A9E, #FECFEF);
+  transform-origin: right center;
+  animation: flapL 0.5s ease-in-out infinite alternate;
+}
+.butterfly .wing.right {
+  right: 0; border-radius: 8% 95% 8% 95%;
+  background: linear-gradient(225deg, #A18CD1, #FBC2EB);
+  transform-origin: left center;
+  animation: flapR 0.5s ease-in-out infinite alternate;
+}
+.butterfly .bfly-body {
+  position: absolute; left: 50%; top: 5px; width: 4px; height: 20px;
+  background: #5b5470; border-radius: 4px; transform: translateX(-50%);
+}
+@keyframes flapL { from { transform: rotateY(12deg); } to { transform: rotateY(-72deg); } }
+@keyframes flapR { from { transform: rotateY(-12deg); } to { transform: rotateY(72deg); } }
+.butterfly.b1 { animation: fly1 24s linear infinite; }
+.butterfly.b2 { width: 28px; height: 22px; animation: fly2 31s linear infinite; animation-delay: -9s; }
+.butterfly.b2 .wing { width: 14px; height: 22px; }
+.butterfly.b2 .bfly-body { height: 15px; }
+.butterfly.b3 { width: 46px; height: 36px; animation: fly3 27s linear infinite; animation-delay: -16s; }
+.butterfly.b3 .wing { width: 23px; height: 36px; }
+.butterfly.b3 .bfly-body { height: 25px; }
+@keyframes fly1 {
+  0% { left: -60px; top: 72%; }
+  25% { left: 22%; top: 38%; }
+  50% { left: 58%; top: 66%; }
+  75% { left: 84%; top: 28%; }
+  100% { left: 108%; top: 52%; }
+}
+@keyframes fly2 {
+  0% { left: 108%; top: 22%; }
+  30% { left: 70%; top: 48%; }
+  60% { left: 32%; top: 24%; }
+  100% { left: -60px; top: 58%; }
+}
+@keyframes fly3 {
+  0% { left: 30%; top: 108%; }
+  35% { left: 55%; top: 70%; }
+  70% { left: 20%; top: 40%; }
+  100% { left: 75%; top: -60px; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .orb, .butterfly, .butterfly .wing { animation: none !important; }
+  .butterfly { display: none; }
 }
 .auth-card {
   background: var(--surface);

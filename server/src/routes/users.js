@@ -4,6 +4,7 @@ import path from "path";
 import fs from "fs";
 import { fileURLToPath } from "url";
 import { authRequired as auth } from "../middleware/auth.js";
+import mongoose from "mongoose";
 import User from "../models/User.js";
 import FriendRequest from "../models/FriendRequest.js";
 
@@ -72,6 +73,9 @@ router.get("/me", auth, async (req, res) => {
 
 // Public profile + friend count
 router.get("/:id", auth, async (req, res) => {
+  // Invalid ObjectId (e.g. "/users/search") → 404 instead of crashing the server
+  if (!mongoose.Types.ObjectId.isValid(req.params.id))
+    return res.status(404).json({ message: "User not found" });
   const u = await User.findById(req.params.id).select(PUBLIC_FIELDS);
   if (!u) return res.status(404).json({ message: "User not found" });
   const friendsCount = await FriendRequest.countDocuments({

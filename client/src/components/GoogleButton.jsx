@@ -49,10 +49,13 @@ export default function GoogleButton({ onDone }) {
           },
         });
         if (btnRef.current && !cancelled) {
+          // Fit the button to its container so it never overflows on small phones
+          const containerW = btnRef.current.parentElement?.clientWidth || 320;
+          const w = Math.max(200, Math.min(320, Math.floor(containerW)));
           window.google.accounts.id.renderButton(btnRef.current, {
             theme: "outline",
             size: "large",
-            width: 320,
+            width: w,
             text: "continue_with",
             shape: "pill",
           });
@@ -71,14 +74,14 @@ export default function GoogleButton({ onDone }) {
     // Render the container hidden so btnRef exists when the effect runs —
     // otherwise renderButton has nowhere to mount and the button never appears.
     return (
-      <div style={{ display: "none" }}>
+      <div style={{ display: "none", width: "100%" }}>
         <div ref={btnRef} />
       </div>
     );
   }
   return (
-    <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 8 }}>
-      <div ref={btnRef} />
+    <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 8, width: "100%" }}>
+      <div ref={btnRef} style={{ width: "100%", display: "flex", justifyContent: "center" }} />
       {error && <div className="error">{error}</div>}
     </div>
   );
