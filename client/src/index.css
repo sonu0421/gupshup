@@ -913,3 +913,23 @@ input::placeholder, textarea::placeholder { color: #A6A8BC; }
 }
 .chat-menu-item:hover { background: var(--brand-soft); }
 .chat-menu-item.danger { color: var(--danger, #DC2626); }
+
+/* ---------- Swipe to delete ---------- */
+.swipe-row { position: relative; overflow: hidden; }
+.swipe-delete {
+  position: absolute; top: 0; right: 0; bottom: 0;
+  display: flex; align-items: center; justify-content: center;
+  background: #DC2626; color: #fff; font-size: 13px; font-weight: 700;
+  overflow: hidden; white-space: nowrap; cursor: pointer;
+  transition: width 0.18s ease;
+}
+.swipe-content { transition: transform 0.18s ease; background: var(--surface); position: relative; }
+/* Desktop: hover par delete dikhao */
+@media (hover: hover) {
+  .swipe-row .swipe-delete { width: 0; }
+  .swipe-row:hover .swipe-delete { width: 84px !important; }
+}
+
+/* ---------- Clickable stat ---------- */
+.stat-btn { background: none; border: none; cursor: pointer; font: inherit; color: inherit; padding: 0; }
+.stat-btn:hover b { color: var(--brand); }

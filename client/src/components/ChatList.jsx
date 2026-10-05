@@ -3,6 +3,7 @@ import api from "../api.js";
 import { useAuth } from "../context/AuthContext.jsx";
 import { convoName, convoOther, timeHM } from "../utils.js";
 import Avatar from "./Avatar.jsx";
+import SwipeableRow from "./SwipeableRow.jsx";
 import { IconSearch, IconPlus } from "./icons.jsx";
 
 const FILTERS = [
@@ -21,6 +22,7 @@ export default function ChatList({
   unread = {},
   people = [],
   onViewProfile,
+  onDeleteChat,
 }) {
   const { user } = useAuth();
   const [query, setQuery] = useState("");
@@ -191,8 +193,8 @@ export default function ChatList({
               ? "You"
               : last?.sender?.name;
           return (
+            <SwipeableRow key={c._id} onDelete={() => onDeleteChat?.(c._id)}>
             <button
-              key={c._id}
               className={`convo-row ${c._id === activeId ? "active" : ""}`}
               onClick={() => onSelect(c._id)}
             >
@@ -217,6 +219,7 @@ export default function ChatList({
                 </div>
               </div>
             </button>
+            </SwipeableRow>
           );
         })}
         {visible.length === 0 && (

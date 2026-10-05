@@ -54,6 +54,21 @@ export default function ProfilePage({
   const [posting, setPosting] = useState(false);
   const [ptab, setPtab] = useState("posts");
   const [confirmUnfriend, setConfirmUnfriend] = useState(false);
+  const [showFriends, setShowFriends] = useState(false);
+  const [friendsList, setFriendsList] = useState([]);
+  const [friendsLoading, setFriendsLoading] = useState(false);
+
+  const openFriends = async () => {
+    setShowFriends(true);
+    setFriendsLoading(true);
+    try {
+      const { data } = await api.get(`/friends/of/${userId}`);
+      setFriendsList(data);
+    } catch {
+      setFriendsList([]);
+    }
+    setFriendsLoading(false);
+  };
   const postFileRef = useRef(null);
 
   const isSelf = String(userId) === String(currentUserId);
@@ -178,7 +193,9 @@ export default function ProfilePage({
 
         <div className="profile-stats">
           <span className="stat"><b>{postsBlocked ? "–" : posts.length}</b><span>Posts</span></span>
-          <span className="stat"><b>{profile.friendsCount ?? 0}</b><span>Connections</span></span>
+          <button className="stat stat-btn" onClick={openFriends}>
+            <b>{profile.friendsCount ?? 0}</b><span>Connections</span>
+          </button>
           <span className="stat"><b>{notes.length}</b><span>Notes</span></span>
         </div>
 
@@ -366,6 +383,39 @@ export default function ProfilePage({
         )}
       </div>
     </main>
+
+    {/* Friends/connections list modal */}
+    {showFriends && (
+      <div className="modal-overlay" onClick={() => setShowFriends(false)}>
+        <div className="modal-card" onClick={(e) => e.stopPropagation()} style={{ maxHeight: "70vh", overflow: "hidden", display: "flex", flexDirection: "column" }}>
+          <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 12 }}>
+            <h3 style={{ margin: 0 }}>Connections ({friendsList.length})</h3>
+            <button className="icon-btn" onClick={() => setShowFriends(false)} aria-label="Close">✕</button>
+          </div>
+          <div style={{ overflowY: "auto" }}>
+            {friendsLoading ? (
+              <p className="muted" style={{ textAlign: "center", padding: 20 }}>Loading…</p>
+            ) : friendsList.length === 0 ? (
+              <p className="muted" style={{ textAlign: "center", padding: 20 }}>
+                {profile.isPrivate && !isSelf ? "🔒 Private account" : "Abhi koi connections nahi"}
+              </p>
+            ) : (
+              friendsList.map((f) => (
+                <div key={f._id} className="person-row">
+                  <span className="person-id">
+                    <Avatar user={f} size={40} />
+                    <span className="person-meta">
+                      <span className="person-name">{f.name}</span>
+                      <span className="muted small ellipsis">{f.bio || "Hey, I'm on Gupshup!"}</span>
+                    </span>
+                  </span>
+                </div>
+              ))
+            )}
+          </div>
+        </div>
+      </div>
+    )}
     </PullToRefresh>
   );
 }

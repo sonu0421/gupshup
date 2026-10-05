@@ -280,6 +280,7 @@ export default function Chat() {
       unread={unread}
       people={people}
       onViewProfile={openProfile}
+      onDeleteChat={deleteChat}
     />
     </PullToRefresh>
   );

@@ -19,6 +19,30 @@ router.get("/", auth, async (req, res) => {
   res.json(rels.map((r) => (String(r.from._id) === String(me) ? r.to : r.from)));
 });
 
+// Any user's friends list (for profile page).
+// Private profile ho aur dost na ho to khali list.
+router.get("/of/:userId", auth, async (req, res) => {
+  const me = req.userId;
+  const target = req.params.userId;
+  const targetUser = await User.findById(target).select("isPrivate");
+  if (!targetUser) return res.status(404).json({ message: "User nahi mila" });
+  if (String(target) !== String(me) && targetUser.isPrivate) {
+    const rel = await FriendRequest.findOne({
+      $or: [
+        { from: me, to: target },
+        { from: target, to: me },
+      ],
+      status: "accepted",
+    });
+    if (!rel) return res.json([]);
+  }
+  const rels = await FriendRequest.find({
+    $or: [{ from: target }, { to: target }],
+    status: "accepted",
+  }).populate("from to", FRIEND_FIELDS);
+  res.json(rels.map((r) => (String(r.from._id) === String(target) ? r.to : r.from)));
+});
+
 // Incoming pending requests
 router.get("/requests", auth, async (req, res) => {
   const reqs = await FriendRequest.find({ to: req.userId, status: "pending" })
