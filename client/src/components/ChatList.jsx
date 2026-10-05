@@ -164,10 +164,11 @@ export default function ChatList({
               <button className="icon-btn" onClick={() => { setShowGroup(false); setGroupQuery(""); setGroupResults([]); setSelected([]); }} aria-label="Close">✕</button>
             </div>
             <input
-              placeholder="Group ka naam likho…"
+              placeholder="👥 Group ka naam likho… (zaroori!)"
               value={groupName}
               onChange={(e) => setGroupName(e.target.value)}
-              style={{ marginBottom: 8 }}
+              style={{ marginBottom: 8, borderColor: !groupName.trim() ? "var(--danger)" : undefined, borderWidth: !groupName.trim() ? 2 : undefined }}
+              autoFocus
             />
             {/* Group ke andar apna search box! */}
             <div className="chatlist-search" style={{ marginBottom: 8 }}>
