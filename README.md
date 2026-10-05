@@ -169,3 +169,9 @@ when `dist/` exists — in dev, keep using the Vite server on :5173 (it proxies
 - Emoji picker, message search, message reactions/reply
 - Stories (24-hour photo/status updates)
 - Deploy: Render/Railway (server) + Vercel (client) + Atlas (DB)
+
+## License
+
+MIT License — Copyright (c) 2026 Sonu Kumar
+
+See [LICENSE](LICENSE) for details.
