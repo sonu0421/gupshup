@@ -885,3 +885,16 @@ input::placeholder, textarea::placeholder { color: #A6A8BC; }
 .conn-dot { width: 8px; height: 8px; border-radius: 50%; background: currentColor; animation: connPulse 1.2s ease-in-out infinite; }
 @keyframes connPulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.35; } }
 @media (prefers-reduced-motion: reduce) { .conn-dot { animation: none; } }
+
+/* ---------- Optimistic sending states ---------- */
+.bubble.sending { opacity: 0.85; }
+.bubble-img-wrap { position: relative; }
+.upload-overlay {
+  position: absolute; inset: 0; display: flex; align-items: center; justify-content: center;
+  background: rgba(0,0,0,0.35); border-radius: 12px; color: #fff; font-size: 26px;
+}
+.retry-btn {
+  margin-top: 6px; font-size: 12px; font-weight: 700; color: #B3261E;
+  background: #FDECEC; border: 1px solid #F5C6C2; border-radius: 8px;
+  padding: 6px 10px; cursor: pointer; width: 100%;
+}

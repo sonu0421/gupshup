@@ -59,9 +59,22 @@ export default function ChatWindow({ convo, onlineUsers, onBack, onViewProfile }
 
     const onNew = (msg) => {
       if (String(msg.conversation) !== String(convoId)) return;
-      setMessages((prev) =>
-        prev.some((m) => m._id === msg._id) ? prev : [...prev, msg]
-      );
+      setMessages((prev) => {
+        // Apna optimistic ("sending...") bubble tha to use asli message se replace karo
+        if (msg.clientTempId) {
+          const idx = prev.findIndex((m) => m._id === msg.clientTempId);
+          if (idx !== -1) {
+            const next = [...prev];
+            // blob URL revoke karo taaki memory leak na ho
+            if (next[idx].image?.startsWith("blob:")) {
+              try { URL.revokeObjectURL(next[idx].image); } catch { /* ignore */ }
+            }
+            next[idx] = { ...msg, sending: false };
+            return next;
+          }
+        }
+        return prev.some((m) => m._id === msg._id) ? prev : [...prev, msg];
+      });
       const mine = String(msg.sender._id || msg.sender) === String(user._id);
       if (!mine) {
         markSeen();
@@ -148,7 +161,21 @@ export default function ChatWindow({ convo, onlineUsers, onBack, onViewProfile }
     e.preventDefault();
     const msg = text.trim();
     if (!msg) return;
-    getSocket().emit("send-message", { conversationId: convoId, text: msg });
+    // Optimistic: bhejte hi bubble dikhao ("sending..." ke saath), server
+    // confirm kare to asli message se replace ho jayega
+    const tempId = `temp-${Date.now()}-${Math.random().toString(36).slice(2)}`;
+    const tempMsg = {
+      _id: tempId,
+      conversation: convoId,
+      sender: { _id: user._id, name: user.name },
+      text: msg,
+      image: null,
+      createdAt: new Date().toISOString(),
+      sending: true,
+    };
+    setMessages((prev) => [...prev, tempMsg]);
+    setTimeout(() => scrollToBottom(), 50);
+    getSocket().emit("send-message", { conversationId: convoId, text: msg, clientTempId: tempId });
     emitTyping(false);
     clearTimeout(typingTimer.current);
     setText("");
@@ -158,6 +185,22 @@ export default function ChatWindow({ convo, onlineUsers, onBack, onViewProfile }
     const file = e.target.files?.[0];
     e.target.value = "";
     if (!file) return;
+    // Optimistic: photo select karte hi turant preview dikhao, upload
+    // background me hoga. Fail ho to "retry" dikhega.
+    const tempId = `temp-${Date.now()}-${Math.random().toString(36).slice(2)}`;
+    const blobUrl = URL.createObjectURL(file);
+    const tempMsg = {
+      _id: tempId,
+      conversation: convoId,
+      sender: { _id: user._id, name: user.name },
+      text: "",
+      image: blobUrl,
+      createdAt: new Date().toISOString(),
+      sending: true,
+      uploadFailed: false,
+    };
+    setMessages((prev) => [...prev, tempMsg]);
+    setTimeout(() => scrollToBottom(), 50);
     setUploading(true);
     try {
       const form = new FormData();
@@ -170,9 +213,14 @@ export default function ChatWindow({ convo, onlineUsers, onBack, onViewProfile }
         conversationId: convoId,
         text: "",
         image: data.url,
+        clientTempId: tempId,
       });
     } catch {
-      // upload failed — stay silent, user can retry
+      // upload failed — bubble par retry dikhao
+      setMessages((prev) =>
+        prev.map((m) => (m._id === tempId ? { ...m, sending: false, uploadFailed: true } : m))
+      );
+      try { URL.revokeObjectURL(blobUrl); } catch { /* ignore */ }
     } finally {
       setUploading(false);
     }
@@ -217,29 +265,48 @@ export default function ChatWindow({ convo, onlineUsers, onBack, onViewProfile }
       <div className="messages" ref={scrollRef} onScroll={handleScroll}>
         {messages.map((m) => {
           const mine = String(m.sender._id || m.sender) === String(user._id);
-          const seen = mine && isSeenByAll(m, convo, user._id);
+          const seen = mine && !m.sending && isSeenByAll(m, convo, user._id);
           return (
             <div key={m._id} className={`msg-row ${mine ? "mine" : ""}`}>
-              <div className="bubble">
+              <div className={`bubble ${m.sending ? "sending" : ""}`}>
                 {!mine && <div className="sender">{m.sender.name}</div>}
                 {m.image && (
-                  <img
-                    src={fileUrl(m.image)}
-                    alt="Shared photo"
-                    className="bubble-img"
-                    loading="lazy"
-                    onClick={() => setLightbox(fileUrl(m.image))}
-                  />
+                  <div className="bubble-img-wrap">
+                    <img
+                      src={m.image.startsWith("blob:") ? m.image : fileUrl(m.image)}
+                      alt="Shared photo"
+                      className="bubble-img"
+                      loading="lazy"
+                      onClick={() => !m.sending && setLightbox(fileUrl(m.image))}
+                    />
+                    {m.sending && (
+                      <div className="upload-overlay">
+                        <span className="ptr-spinner spinning">⟳</span>
+                      </div>
+                    )}
+                  </div>
                 )}
                 {m.text && <div>{m.text}</div>}
                 <div className="time">
                   {timeHM(m.createdAt)}
                   {mine && (
                     <span className={`ticks ${seen ? "seen" : ""}`}>
-                      {seen ? "✓✓" : "✓"}
+                      {m.sending ? "🕐" : seen ? "✓✓" : "✓"}
                     </span>
                   )}
                 </div>
+                {m.uploadFailed && (
+                  <button
+                    className="retry-btn"
+                    onClick={() => {
+                      // purana failed bubble hatao, user dobara photo chune
+                      setMessages((prev) => prev.filter((x) => x._id !== m._id));
+                      fileRef.current?.click();
+                    }}
+                  >
+                    ⚠️ Send fail — tap to retry
+                  </button>
+                )}
               </div>
             </div>
           );

@@ -77,7 +77,7 @@ export function initSocket(io) {
       }
     });
 
-    socket.on("send-message", async ({ conversationId, text, image }) => {
+    socket.on("send-message", async ({ conversationId, text, image, clientTempId }) => {
       try {
         const clean = text?.trim() || "";
         if (!clean && !image) return;
@@ -92,14 +92,18 @@ export function initSocket(io) {
         });
         await Conversation.findByIdAndUpdate(conversationId, { lastMessage: message._id });
         const populated = await message.populate("sender", "name email");
+        // clientTempId is NOT saved — just echoed so the sender can replace
+        // its optimistic ("sending...") bubble with the real message
+        const out = populated.toObject();
+        if (clientTempId) out.clientTempId = clientTempId;
 
         // Everyone viewing this chat gets it instantly...
-        io.to(`convo:${conversationId}`).emit("new-message", populated);
+        io.to(`convo:${conversationId}`).emit("new-message", out);
         // ...and every participant's sidebar refreshes its preview
         convo.participants.forEach((p) => {
           io.to(`user:${p}`).emit("conversation-updated", {
             conversationId,
-            message: populated,
+            message: out,
           });
         });
       } catch (err) {
