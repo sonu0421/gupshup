@@ -5,6 +5,32 @@ import { IconHeart, IconChevronLeft } from "./icons.jsx";
 import { timeHM, fileUrl } from "../utils.js";
 import PullToRefresh from "./PullToRefresh.jsx";
 
+// Double-tap to confirm logout (native confirm() dialogs don't work well
+// in all browsers/automation; this is also nicer on mobile)
+function LogoutButton({ onLogout }) {
+  const [armed, setArmed] = useState(false);
+  const timer = useRef(null);
+  const handle = () => {
+    if (armed) {
+      clearTimeout(timer.current);
+      onLogout();
+    } else {
+      setArmed(true);
+      timer.current = setTimeout(() => setArmed(false), 3000);
+    }
+  };
+  useEffect(() => () => clearTimeout(timer.current), []);
+  return (
+    <button
+      className="btn"
+      style={{ width: "100%", marginTop: 4, color: "var(--danger, #DC2626)" }}
+      onClick={handle}
+    >
+      {armed ? "Pakka? Dobara dabao ✓" : "⎋ Log out"}
+    </button>
+  );
+}
+
 // Full profile dashboard (FB/Insta style): header, stats, posts, notes.
 export default function ProfilePage({
   userId,
@@ -173,15 +199,7 @@ export default function ProfilePage({
         )}
 
         {isSelf && onLogout && (
-          <button
-            className="btn"
-            style={{ width: "100%", marginTop: 4, color: "var(--danger, #DC2626)" }}
-            onClick={() => {
-              if (confirm("Log out kar dein?")) onLogout();
-            }}
-          >
-            ⎋ Log out
-          </button>
+          <LogoutButton onLogout={onLogout} />
         )}
 
         <div className="chip-row" style={{ marginBottom: 4 }}>

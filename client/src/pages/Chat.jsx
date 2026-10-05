@@ -30,6 +30,7 @@ export default function Chat() {
   const [me, setMe] = useState(null); // my full profile (avatar, bio)
   const [profileId, setProfileId] = useState(null); // overlay profile dashboard
   const [editingProfile, setEditingProfile] = useState(false);
+  const [profileRefreshKey, setProfileRefreshKey] = useState(0); // force ProfilePage reload after edit
   const [showNewMsg, setShowNewMsg] = useState(false);
 
   // Notification center
@@ -197,6 +198,7 @@ export default function Chat() {
     setMe(updated);
     updateUser({ avatar: updated.avatar, avatarColor: updated.avatarColor, bio: updated.bio });
     setEditingProfile(false);
+    setProfileRefreshKey((k) => k + 1); // ProfilePage turant nayi DP dikhaye
     refreshSocial();
   };
 
@@ -345,7 +347,7 @@ export default function Chat() {
           <div className="page">
             <div className="greet">
               <h2>Friend requests</h2>
-              <p>{requests.length === 0 ? "You're all caught up! ✨" : `${requests.length} waiting for you`}</p>
+              <p>{requests.length === 0 ? "You're all caught up! ✨" : `${requests.length} request${requests.length === 1 ? "" : "s"} waiting for you`}</p>
             </div>
             <PullToRefresh onRefresh={async () => { refreshSocial(); }}>
               <Requests
@@ -361,6 +363,7 @@ export default function Chat() {
         {tab === "profile" && (
           <div className="page" style={{ maxWidth: 680 }}>
             <ProfilePage
+              key={`profile-${profileRefreshKey}`}
               userId={user._id}
               currentUserId={user._id}
               onEdit={() => me && setEditingProfile(true)}

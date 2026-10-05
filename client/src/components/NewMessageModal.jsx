@@ -41,7 +41,7 @@ export default function NewMessageModal({ people, onClose, onSelect }) {
               <Avatar user={p} size={40} />
               <span>
                 <span style={{ display: "block" }}>{p.name}</span>
-                <span className="muted small">{p.email}</span>
+                <span className="muted small">{p.bio || "Hey, I'm on Gupshup!"}</span>
               </span>
             </button>
           ))}

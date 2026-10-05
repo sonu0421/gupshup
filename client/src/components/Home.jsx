@@ -52,11 +52,24 @@ export default function Home({ onViewProfile }) {
     );
   };
 
+  const [confirmDeleteId, setConfirmDeleteId] = useState(null);
+
   const remove = async (item) => {
-    if (!confirm("Ye delete kar dein?")) return;
+    // Pehli tap par confirm mango, dusri par delete karo (native confirm
+    // dialog automation/mobile me achha nahi lagta)
+    if (confirmDeleteId !== item._id) {
+      setConfirmDeleteId(item._id);
+      setTimeout(() => setConfirmDeleteId((id) => (id === item._id ? null : id)), 3000);
+      return;
+    }
+    setConfirmDeleteId(null);
     const base = item.kind === "post" ? "posts" : "notes";
-    await api.delete(`/${base}/${item._id}`);
-    setItems((prev) => prev.filter((it) => it._id !== item._id));
+    try {
+      await api.delete(`/${base}/${item._id}`);
+      setItems((prev) => prev.filter((it) => it._id !== item._id));
+    } catch {
+      alert("Delete nahi ho paya");
+    }
   };
 
   const isMine = (item) => String(item.user._id || item.user) === String(user._id);
@@ -102,7 +115,7 @@ export default function Home({ onViewProfile }) {
               </button>
               {isMine(item) && (
                 <button className="link danger" onClick={() => remove(item)}>
-                  Delete
+                  {confirmDeleteId === item._id ? "Pakka? ✓" : "Delete"}
                 </button>
               )}
             </div>
