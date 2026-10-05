@@ -5,7 +5,8 @@ import { fileUrl } from "../utils.js";
 export default function Avatar({ user, size = 40 }) {
   const dim = { width: size, height: size, fontSize: Math.round(size * 0.45) };
   const [imgBroken, setImgBroken] = useState(false);
-  if ((user?.avatar?.startsWith("/uploads/") || user?.avatar?.startsWith("http")) && !imgBroken) {
+  const isPhoto = user?.avatar?.startsWith("/uploads/") || user?.avatar?.startsWith("http") || user?.avatar?.startsWith("blob:");
+  if (isPhoto && !imgBroken) {
     return (
       <img
         className="avatar avatar-img"

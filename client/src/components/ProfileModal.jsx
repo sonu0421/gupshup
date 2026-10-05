@@ -13,20 +13,32 @@ export default function ProfileModal({ user, onClose, onSave }) {
   const [isPrivate, setIsPrivate] = useState(!!user.isPrivate);
   const [uploading, setUploading] = useState(false);
   const [saving, setSaving] = useState(false);
+  const [savedTick, setSavedTick] = useState(false);
+  const [localPreview, setLocalPreview] = useState(null); // turant dikhne wali preview
   const fileRef = useRef(null);
 
-  const previewUser = { ...user, bio, avatar, avatarColor };
+  // Local preview (abhi select ki) ko pehle dikhao, phir server wali URL
+  const previewUser = { ...user, bio, avatar: localPreview || avatar, avatarColor };
 
   const handleFile = async (e) => {
     const file = e.target.files[0];
+    e.target.value = "";
     if (!file) return;
+    // 1) TURANT preview dikhao — upload ka wait mat karo
+    const blobUrl = URL.createObjectURL(file);
+    setLocalPreview(blobUrl);
+    // 2) Background me upload karo
     setUploading(true);
     const form = new FormData();
     form.append("avatar", file);
     try {
       const { data } = await api.post("/users/me/avatar", form);
       setAvatar(data.avatar);
+      setLocalPreview(null);
+      try { URL.revokeObjectURL(blobUrl); } catch { /* ignore */ }
     } catch {
+      setLocalPreview(null);
+      try { URL.revokeObjectURL(blobUrl); } catch { /* ignore */ }
       alert("Upload fail — sirf image file, max 2MB");
     }
     setUploading(false);
@@ -36,11 +48,15 @@ export default function ProfileModal({ user, onClose, onSave }) {
     setSaving(true);
     try {
       await api.put("/users/me", { bio, avatar, avatarColor, isPrivate });
-      onSave({ ...user, bio, avatar, avatarColor, isPrivate });
+      setSavedTick(true);
+      // "Saved ✓" dikhao phir band karo — user ko pata chale ho gaya!
+      setTimeout(() => {
+        onSave({ ...user, bio, avatar, avatarColor, isPrivate });
+      }, 700);
     } catch {
       alert("Save nahi ho paya, dobara try karo");
+      setSaving(false);
     }
-    setSaving(false);
   };
 
   return (
@@ -51,7 +67,21 @@ export default function ProfileModal({ user, onClose, onSave }) {
         </button>
 
         <div className="profile-head">
-          <Avatar user={previewUser} size={84} />
+          <div style={{ position: "relative" }}>
+            <Avatar user={previewUser} size={84} />
+            {uploading && (
+              <div
+                style={{
+                  position: "absolute", inset: 0, display: "flex",
+                  alignItems: "center", justifyContent: "center",
+                  background: "rgba(0,0,0,0.4)", borderRadius: "50%",
+                  color: "#fff", fontSize: 24,
+                }}
+              >
+                <span className="ptr-spinner spinning">⟳</span>
+              </div>
+            )}
+          </div>
           <h2>{user.name}</h2>
           <p className="muted small">{user.email}</p>
         </div>
@@ -112,8 +142,8 @@ export default function ProfileModal({ user, onClose, onSave }) {
           <span>🔒 Private account <span className="muted small">(posts sirf friends dekhenge)</span></span>
         </label>
 
-        <button className="btn primary block" onClick={save} disabled={saving}>
-          {saving ? "Saving…" : "Save profile"}
+        <button className="btn primary block" onClick={save} disabled={saving || uploading}>
+          {savedTick ? "Saved ✓" : saving ? "Saving…" : uploading ? "Photo upload ho rahi…" : "Save profile"}
         </button>
       </div>
     </div>
