@@ -5,9 +5,10 @@ import { IconHeart } from "./icons.jsx";
 import { useAuth } from "../context/AuthContext.jsx";
 import PullToRefresh from "./PullToRefresh.jsx";
 import { timeHM, fileUrl } from "../utils.js";
+import StoriesBar from "./StoriesBar.jsx";
 
 // Home: FB/Insta style feed — friends' photo posts + everyone's notes, newest first.
-export default function Home({ onViewProfile }) {
+export default function Home({ onViewProfile, onReplyToUser }) {
   const { user } = useAuth();
   const [items, setItems] = useState([]);
   const [text, setText] = useState("");
@@ -76,6 +77,8 @@ export default function Home({ onViewProfile }) {
 
   return (
     <PullToRefresh onRefresh={load}>
+      {/* Stories strip (24h, friends-only) */}
+      <StoriesBar onReplyToUser={onReplyToUser} />
       <div className="note-composer feed-composer">
         <div className="composer-row">
           <Avatar user={user} size={40} />

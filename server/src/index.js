@@ -22,6 +22,7 @@ import postsRoutes from "./routes/posts.js";
 import notesRoutes from "./routes/notes.js";
 import notificationsRoutes from "./routes/notifications.js";
 import feedRoutes from "./routes/feed.js";
+import storiesRoutes from "./routes/stories.js";
 import { initSocket } from "./socket/index.js";
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
@@ -60,6 +61,7 @@ app.use("/api/posts", postsRoutes);
 app.use("/api/notes", notesRoutes);
 app.use("/api/notifications", notificationsRoutes);
 app.use("/api/feed", feedRoutes);
+app.use("/api/stories", storiesRoutes);
 
 // Uploaded photos (avatars, posts, chat images) — same dir multer writes to.
 // NOTE: Helmet sets Cross-Origin-Resource-Policy: same-origin globally, which

@@ -46,6 +46,11 @@ router.get("/:conversationId", authRequired, async (req, res) => {
     return res.status(403).json({ message: "Not allowed" });
   const messages = await Message.find({ conversation: req.params.conversationId })
     .populate("sender", "name email avatar avatarColor")
+    .populate({
+      path: "replyTo",
+      select: "text image sender",
+      populate: { path: "sender", select: "name" },
+    })
     .sort({ createdAt: 1 })
     .limit(300);
   res.json(messages);

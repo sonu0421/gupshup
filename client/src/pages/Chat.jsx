@@ -347,7 +347,7 @@ export default function Chat() {
               </h2>
               <p>Here's what's happening in your circles today.</p>
             </div>
-            <Home onViewProfile={openProfile} />
+            <Home onViewProfile={openProfile} onReplyToUser={openDirectChat} />
           </div>
         )}
 
